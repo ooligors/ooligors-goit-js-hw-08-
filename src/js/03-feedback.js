@@ -1,63 +1,55 @@
-
-let throttle = require('lodash.throttle');
+const throttle = require('lodash.throttle');
 const formEl = document.querySelector('.feedback-form');
-formEl.addEventListener('submit', onFormSubmit);
-formEl.addEventListener('input', throttle(onInputData, 500));
-let obj;
+const storageKey = 'feedback-form-state';
 
-chechLocalStorage();
+const feedbackFormState = {
+    "email": "",
+    "message": "",
+};
 
 function onInputData(e) {
-    // console.log(e);
-    // console.log(formEl.elements);
-    // console.log(formEl.elements.email);
-    // console.log(formEl.elements.email.value);
-    // console.log(e.target.value);
-    // console.log(e.currentTarget.value);
+    feedbackFormState.email = formEl.elements.email.value;
+    feedbackFormState.message = formEl.elements.message.value;
 
-    obj = {
-        // name: formEl.elements.name.value,
-        "email": formEl.elements.email.value,
-        "message": formEl.elements.message.value,
-    }
-
-    localStorage.setItem('feedback-form-state', JSON.stringify(obj));
-}
-
-function chechLocalStorage() {
-    try {
-        const dataStorage = JSON.parse(localStorage.getItem('feedback-form-state'));
-        if (dataStorage) {
-            formEl.elements.email.value = dataStorage.email;
-            // console.log(dataStorage.email);
-            formEl.elements.message.value = dataStorage.message;
-            // console.log(dataStorage.message);
-        } else {
-            formEl.elements.email.value = '';
-            formEl.elements.message.value = '';
-        }
-    }
-    catch {
-        console.log("error");
-    }
-
+    localStorage.setItem(storageKey, JSON.stringify(feedbackFormState));
 }
 
 function onFormSubmit(e) {
     e.preventDefault();
     if (formEl.elements.email.value.trim() === "" || formEl.elements.message.value.trim() === "") {
         alert('Всі поля повинні бути заповнені');
+        return;
     }
-    else {
-        console.log(obj);
-    }
+
+    console.log(feedbackFormState);
 
     formEl.reset();
-    localStorage.removeItem('feedback-form-state');
-
+    localStorage.removeItem(storageKey);
 }
 
+function checkLocalStorage() {
 
+    try {
+        const dataStorage = JSON.parse(localStorage.getItem(storageKey));
+
+        if (dataStorage) {
+            formEl.elements.email.value = dataStorage.email;
+            formEl.elements.message.value = dataStorage.message;
+
+            feedbackFormState.email = dataStorage.email;
+            feedbackFormState.message = dataStorage.message;
+
+        }
+    }
+    catch {
+        console.log("error");
+    }
+}
+
+formEl.addEventListener('submit', onFormSubmit);
+formEl.addEventListener('input', throttle(onInputData, 500));
+
+checkLocalStorage();
 
 
 
